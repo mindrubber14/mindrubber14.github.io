@@ -1,0 +1,10 @@
+# Technical settings. You normally don't need to edit this file.
+# Add photos and pages at https://app.pagescms.org
+title: Everyday
+timezone: Australia/Sydney
+collections:
+  projects:
+    output: false
+  uploads:
+    output: false
+exclude: [README.md, .pages.yml]

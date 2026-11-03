@@ -1,0 +1,82 @@
+---
+---
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{ site.title }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
+</head>
+<body>
+<aside class="menu" id="menu" aria-label="Menu">
+  <div class="mhead">
+    <a class="reset" href="{{ '/' | relative_url }}" id="home-link" aria-label="Reset to home" title="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></a>
+    <button class="arrow" id="hide" aria-controls="menu" aria-label="Hide menu" title="Hide menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></svg></button>
+  </div>
+  <nav class="sect pages" id="pages" aria-label="Pages"></nav>
+  <div id="controls" class="sect" hidden>
+    <div class="sect">
+      <button class="switch" id="static" aria-pressed="false"><span>Static</span><span class="pill"><span class="on1">On</span><span class="off1">Off</span></span></button>
+    </div>
+    <div class="sect" style="margin-top:22px">
+      <h2><span>Tags</span><button class="clear" id="clear" hidden>Clear</button></h2>
+      <div id="tags" class="sect"></div>
+    </div>
+  </div>
+  <div id="detail" class="detail" hidden></div>
+</aside>
+<button class="open-menu" id="open" aria-label="Show menu" title="Show menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></svg></button>
+
+<main id="main">
+  <div id="v-grid" hidden>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" hidden>Nothing tagged with these yet.</div>
+  </div>
+</main>
+
+<div class="zoom" id="zoom" hidden>
+  <div class="stage" id="stage"></div>
+  <div class="zcap detail" id="zcap"></div>
+</div>
+
+<script>
+window.PROJECTS=[];window.ITEMS=[];
+{%- assign none = "" | split: "" -%}
+{%- assign projects = site.projects | sort: "order" -%}
+{%- for p in projects %}
+PROJECTS.push({slug:{{ p.slug | jsonify }},title:{{ p.title | jsonify }}});
+{%- endfor -%}
+{%- assign ups = site.uploads | sort: "date" | reverse -%}
+{%- for u in ups -%}
+  {%- assign key = u.page | split: "/" | last | remove: ".md" | slugify -%}
+  {%- assign ut = u.tags | default: none -%}
+  {%- assign notes = u.notes | default: none -%}
+  {%- assign files = u.files | default: none -%}
+  {%- assign links = u.links | default: none -%}
+  {%- assign files = files | concat: links -%}
+  {%- assign d = u.date | date: "%Y-%m-%d" -%}
+  {%- for f in files -%}
+    {%- assign note = nil -%}
+    {%- for n in notes -%}{%- if n.file == f or n.link == f -%}{%- assign note = n -%}{%- endif -%}{%- endfor -%}
+    {%- assign nt = note.tags | default: none -%}
+    {%- assign tl = note.title | default: u.title -%}
+    {%- assign cp = note.caption | default: u.caption | default: "" %}
+ITEMS.push({p:{{ key | jsonify }},src:{{ f | relative_url | jsonify }},date:{{ d | jsonify }},title:{{ tl | jsonify }},desc:{{ cp | jsonify }},tags:{{ ut | concat: nt | uniq | jsonify }}});
+  {%- endfor -%}
+  {%- for n in notes -%}
+    {%- unless files contains n.file -%}{%- if n.file -%}
+    {%- assign nt = n.tags | default: none -%}
+    {%- assign tl = n.title | default: u.title -%}
+    {%- assign cp = n.caption | default: u.caption | default: "" %}
+ITEMS.push({p:{{ key | jsonify }},src:{{ n.file | relative_url | jsonify }},date:{{ d | jsonify }},title:{{ tl | jsonify }},desc:{{ cp | jsonify }},tags:{{ ut | concat: nt | uniq | jsonify }}});
+    {%- endif -%}{%- endunless -%}
+  {%- endfor -%}
+{%- endfor %}
+</script>
+<script src="{{ '/assets/site.js' | relative_url }}"></script>
+</body>
+</html>
