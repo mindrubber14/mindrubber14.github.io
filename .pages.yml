@@ -1,0 +1,97 @@
+media:
+  input: media
+  output: /media
+
+content:
+  - name: uploads
+    label: Uploads
+    type: collection
+    path: _uploads
+    filename: "{year}-{month}-{day}-{primary}.md"
+    view:
+      fields: [title, page, date]
+      primary: title
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Name for this upload (e.g. Camping trip)
+        type: string
+        required: true
+      - name: page
+        label: Page
+        type: reference
+        required: true
+        options:
+          collection: projects
+          value: "{path}"
+          label: "{primary}"
+      - name: date
+        label: Date
+        type: date
+        required: true
+      - name: files
+        label: Photos, GIFs and videos (drag in as many as you like)
+        type: file
+        options:
+          multiple:
+            max: 300
+          extensions: [jpg, jpeg, png, gif, webp, avif, mp4, mov, m4v, webm]
+      - name: links
+        label: Vimeo or YouTube links (paste one, press Enter, paste the next)
+        type: string
+        list: true
+      - name: tags
+        label: Tags for everything in this upload (press Enter after each)
+        type: string
+        list: true
+      - name: caption
+        label: Caption for everything in this upload (optional)
+        type: text
+      - name: notes
+        label: Captions for single photos (optional)
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title}"
+        fields:
+          - name: file
+            label: Which photo
+            type: file
+            options:
+              extensions: [jpg, jpeg, png, gif, webp, avif, mp4, mov, m4v, webm]
+          - name: link
+            label: Or which video link (paste the same Vimeo/YouTube link)
+            type: string
+          - name: title
+            label: Title
+            type: string
+          - name: caption
+            label: Caption
+            type: text
+          - name: tags
+            label: Extra tags for this photo
+            type: string
+            list: true
+
+  - name: projects
+    label: Pages
+    type: collection
+    path: _projects
+    filename: "{primary}.md"
+    view:
+      fields: [title, order]
+      primary: title
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: title
+        label: Page name (shown in the menu)
+        type: string
+        required: true
+      - name: order
+        label: Menu position (1 is the top)
+        type: number
