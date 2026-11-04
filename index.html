@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 </head>
-<body>
+<body class="menu-off">
 <aside class="menu" id="menu" aria-label="Menu">
   <div class="mhead">
     <div class="hl"><a class="reset" href="{{ '/' | relative_url }}" id="home-link" aria-label="Reset to home" title="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></a><button class="ic" id="theme" data-label="Dark mode" aria-label="Dark mode" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4 11.6c.8.7 1.2 1.6 1.3 2.6h5.4c.1-1 .5-1.9 1.3-2.6A6.5 6.5 0 0 0 12 2.5z"/></svg></button></div>
@@ -28,7 +28,7 @@
         </div>
         <div class="seg" id="order" role="group" aria-label="Order">
           <button class="ic" data-o="time" data-label="In order" aria-label="In order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></button>
-          <button class="ic" data-o="shuffle" data-label="Shuffle" aria-label="Shuffle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h4v4"/><path d="M4 20 20 4"/><path d="M20 16v4h-4"/><path d="M14.5 14.5 20 20"/><path d="M4 4l5 5"/></svg></button>
+          <button class="ic" data-o="shuffle" data-label="Shuffle (S)" aria-label="Shuffle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h4v4"/><path d="M4 20 20 4"/><path d="M20 16v4h-4"/><path d="M14.5 14.5 20 20"/><path d="M4 4l5 5"/></svg></button>
         </div>
       </div>
     </div>

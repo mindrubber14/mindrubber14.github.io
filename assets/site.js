@@ -87,7 +87,7 @@ function buildGrid(){
       m.addEventListener('loadedmetadata',()=>setRatio(b,m.videoWidth,m.videoHeight));
     }else if(d.kind==='embed'){
       m=document.createElement('img');m.alt=d.title||'';setRatio(b,16,9);
-      thumbFor(d,(src,w,h)=>{if(src)m.src=src;setRatio(b,w,h);});
+      thumbFor(d,(src,w,h)=>{if(src)m.src=src;d.vr=w&&h?w/h:16/9;setRatio(b,w,h);});
       io&&io.observe(b);
     }else{
       m=document.createElement('img');m.src=d.src;m.alt=d.title||'';m.loading='lazy';m.decoding='async';
@@ -137,6 +137,20 @@ function applyTheme(){
 $('theme').addEventListener('click',()=>{const d=document.documentElement.classList.toggle('dark');store.set('theme',d?'dark':'light');applyTheme();});
 applyTheme();
 
+/* Vimeo/YouTube in the grid: size the player so the video covers its tile edge to edge */
+function fitFrame(c,f,vr){
+  vr=vr||16/9;const cr=(c.clientWidth||1)/(c.clientHeight||1);
+  const w=Math.max(1,vr/cr)*100,h=Math.max(1,cr/vr)*100;
+  f.style.width=w+'%';f.style.height=h+'%';f.style.left=(100-w)/2+'%';f.style.top=(100-h)/2+'%';
+}
+window.addEventListener('resize',()=>grid.querySelectorAll('.cell iframe').forEach(f=>{const c=f.parentElement;fitFrame(c,f,S.items[c.dataset.i]&&S.items[c.dataset.i].vr);}));
+
+/* Keyboard: S shuffles (press again to reshuffle) */
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey||/input|textarea|select/i.test(e.target.tagName))return;
+  if((e.key==='s'||e.key==='S')&&S.page&&S.zoom<0){S.order='shuffle';applyOrder();window.scrollTo(0,0);}
+});
+
 /* --- static mode --- */
 function freeze(img,canvas){
   if(!img.complete||!img.naturalWidth){img.addEventListener('load',()=>freeze(img,canvas),{once:true});return;}
@@ -153,8 +167,9 @@ function applyStatic(){
     if(d&&d.kind==='embed'){
       const live=!S.stat&&!c.hidden&&S.page&&S.zoom<0&&(!io||c.dataset.inview==='1');
       let f=c.querySelector('iframe');
-      if(live&&!f){f=document.createElement('iframe');f.src=embedURL(d.embed,true);f.title=d.title||'Video';f.tabIndex=-1;f.allow='autoplay; fullscreen; picture-in-picture';f.setAttribute('aria-hidden','true');c.appendChild(f);}
-      if(!live&&f)f.remove();
+      if(live&&!f){f=document.createElement('iframe');f.src=embedURL(d.embed,true);f.title=d.title||'Video';f.tabIndex=-1;f.allow='autoplay; fullscreen; picture-in-picture';f.setAttribute('aria-hidden','true');
+        f.addEventListener('load',()=>setTimeout(()=>c.classList.add('playing'),400));c.appendChild(f);fitFrame(c,f,d.vr);}
+      if(!live&&f){f.remove();c.classList.remove('playing');}
     }
   });
   const z=$('zoom'),zv=z.querySelector('video'),zc=z.querySelector('canvas');
@@ -214,19 +229,18 @@ document.addEventListener('click',e=>{if(mobile()&&!document.body.classList.cont
 
 /* --- pages (the address ends in #page-name) --- */
 function route(){
-  const slug=decodeURIComponent(location.hash.slice(1));
+  const slug=decodeURIComponent(location.hash.slice(1))||(PROJECTS[0]&&PROJECTS[0].slug)||'';  // no page chosen: open the first page (Everyday)
   const proj=PROJECTS.find(p=>p.slug===slug)||null;
   closeZoom();
   if((proj&&proj.slug)!==S.page){S.page=proj&&proj.slug;S.tags.clear();S.items=proj?ALL.filter(d=>d.p===proj.slug):[];buildGrid();applyOrder();}
   $('v-grid').hidden=!proj;$('controls').hidden=!proj;
   pagesNav.querySelectorAll('a').forEach(a=>a.classList.toggle('on',a.dataset.slug===S.page));
   if(proj&&mobile())document.body.classList.add('menu-off');
-  if(!proj)document.body.classList.remove('menu-off');
   filter();window.scrollTo(0,0);
 }
 window.addEventListener('hashchange',route);
 $('home-link').addEventListener('click',e=>{
-  e.preventDefault();S.stat=false;store.set('static','0');S.tags.clear();S.order='time';applyOrder();document.documentElement.classList.remove('dark');store.set('theme','light');applyTheme();
+  e.preventDefault();document.body.classList.add('menu-off');S.wasOff=false;S.stat=false;store.set('static','0');S.tags.clear();S.order='time';applyOrder();document.documentElement.classList.remove('dark');store.set('theme','light');applyTheme();
   history.replaceState(null,'',location.pathname+location.search);route();
 });
 route();

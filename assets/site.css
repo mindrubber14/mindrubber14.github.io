@@ -11,7 +11,7 @@ html.dark{color-scheme:dark;--bg:#000000;--fg:#f4f4f0;--muted:#7d7d76;--line:#26
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0}
-body{background:var(--bg);color:var(--fg);font:400 var(--text)/1.5 var(--mono);transition:background-color .2s,color .2s}
+body{background:var(--bg);color:var(--fg);font:400 var(--text)/1.5 var(--mono)}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
 a{color:inherit;text-decoration:none}
 :focus-visible{outline:1px solid var(--fg);outline-offset:2px}
@@ -19,7 +19,7 @@ a{color:inherit;text-decoration:none}
 /* ---------- menu ---------- */
 .menu{position:fixed;top:0;left:0;bottom:0;width:var(--menu);z-index:30;background:var(--bg);
   padding:calc(16px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));
-  overflow-y:auto;display:flex;flex-direction:column;gap:28px;transition:transform .28s ease}
+  overflow-y:auto;display:flex;flex-direction:column;gap:28px}
 body.menu-off .menu{transform:translateX(-101%)}
 .mhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .reset{display:inline-flex;color:var(--muted)}.reset svg{width:14px;height:14px}.reset:hover{color:var(--fg)}
@@ -51,8 +51,8 @@ body.menu-off .menu{transform:translateX(-101%)}
 .ic:hover{color:var(--fg)}
 .ic[aria-pressed="true"]{color:var(--accent)}
 .ic::after{content:attr(data-label);position:absolute;top:calc(100% + 2px);left:50%;transform:translateX(-50%);white-space:nowrap;
-  color:var(--fg);font-size:var(--text);line-height:1;opacity:0;pointer-events:none;transition:opacity .12s;z-index:5}
-.ic:hover::after,.ic:focus-visible::after{opacity:1;transition-delay:.2s}
+  color:var(--fg);font-size:var(--text);line-height:1;opacity:0;pointer-events:none;z-index:5}
+.ic:hover::after,.ic:focus-visible::after{opacity:1}
 .switch[aria-pressed="true"] .on1,.switch[aria-pressed="false"] .off1{background:var(--fg);color:var(--bg)}
 .detail{display:flex;flex-direction:column;gap:14px}
 .detail .back{color:var(--muted)} .detail .back:hover{color:var(--fg)}
@@ -65,13 +65,13 @@ body.menu-off .menu{transform:translateX(-101%)}
 .nav button:hover{color:var(--fg)}
 
 .open-menu{position:fixed;z-index:25;top:calc(14px + env(safe-area-inset-top,0px));left:max(14px,env(safe-area-inset-left,0px));
-  background:var(--bg);padding:3px;display:inline-flex;color:var(--muted);opacity:0;pointer-events:none;transition:opacity .2s}
+  background:var(--bg);padding:3px;display:inline-flex;color:var(--muted);opacity:0;pointer-events:none}
 .open-menu svg{width:15px;height:15px}
 body.menu-off .open-menu{opacity:1;pointer-events:auto}
 .open-menu:hover{color:var(--fg)}
 
 /* ---------- main ---------- */
-main{margin-left:var(--menu);min-height:100vh;transition:margin .28s ease}
+main{margin-left:var(--menu);min-height:100vh}
 body.menu-off main{margin-left:0}
 
 .grid{display:flex;flex-wrap:wrap}
@@ -79,7 +79,8 @@ body.menu-off main{margin-left:0}
 .cell{position:relative;height:var(--row);overflow:hidden;background:var(--soft);display:block}
 .cell img,.cell video,.cell canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .cell canvas{display:none}
-.cell iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;background:transparent}
+.cell iframe{position:absolute;border:0;pointer-events:none;background:transparent}
+.cell.playing{background:#000}.cell.playing>img{visibility:hidden}
 .cell.frozen canvas{display:block}
 .cell:hover img,.cell:hover video,.cell:hover canvas{filter:brightness(.88)}
 .empty{padding:24px;color:var(--muted)}
@@ -101,7 +102,7 @@ body.menu-off main{margin-left:0}
 @media (max-width:760px){
   :root{--row:84px;--menu:min(82vw,300px)}
   main{margin-left:0!important}
-  .menu{box-shadow:0 0 0 100vmax rgba(0,0,0,0);transition:transform .28s ease,box-shadow .28s}
+  .menu{box-shadow:0 0 0 100vmax rgba(0,0,0,0);}
   body:not(.menu-off) .menu{box-shadow:0 0 0 100vmax rgba(0,0,0,.18)}
   .zoom{left:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   .zcap{display:flex;width:100%;padding-top:16px;cursor:default}
