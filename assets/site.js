@@ -28,20 +28,28 @@ const MEDIA_RE=/\.(jpe?g|png|gif|webp|avif|mp4|mov|m4v|webm)$/i;
 const enc=s=>/^\//.test(s)&&!/%[0-9a-f]{2}/i.test(s)?encodeURI(s):s;
 const slugify=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const ALL=[],bySrc={};
+const keyOf=src=>{const e=embedOf(src);return e?e.type+':'+e.id:src;};
 (window.FILES||[]).forEach(path=>{
-  if(!MEDIA_RE.test(path))return;
+  const isLink=/\.txt$/i.test(path);          // e.g. "DSCN0028 vimeo 123456789.txt" = a Vimeo video placed in the folder
+  if(!MEDIA_RE.test(path)&&!isLink)return;
   const parts=path.split('/');               // ["", "media", page, folder..., file]
+  let src=enc(path);
+  if(isLink){
+    const v=parts[parts.length-1].match(/\b(vimeo|youtube|youtu\.?be)\s+([\w-]+)(?:\s+([0-9a-f]{6,}))?/i);
+    if(!v)return;
+    src=/vimeo/i.test(v[1])?'https://vimeo.com/'+v[2]+(v[3]?'/'+v[3]:''):'https://www.youtube.com/watch?v='+v[2];
+  }
   const page=slugify(parts[2]);
   const folder=parts.length>4?parts[3]:'';
   const m=folder.match(/^(\d{4}-\d{2}-\d{2})\s*(.*)$/);
   const date=m?m[1]:'';
   const tags=(m?m[2]:folder).split(',').map(t=>t.trim()).filter(Boolean);
-  const d={p:page,src:enc(path),date,title:'',desc:'',tags,file:parts[parts.length-1]};
-  ALL.push(d);bySrc[d.src]=d;
+  const d={p:page,src,date,title:'',desc:'',tags,file:parts[parts.length-1],dir:parts.slice(0,-1).join('/')};
+  ALL.push(d);bySrc[keyOf(src)]=d;
   if(!PROJECTS.some(x=>x.slug===page))PROJECTS.push({slug:page,title:parts[2].replace(/[-_]+/g,' ').replace(/^./,c=>c.toUpperCase()),auto:true});
 });
 (window.ITEMS||[]).forEach(d=>{
-  const src=enc(d.src),hit=bySrc[src];
+  const src=enc(d.src),hit=bySrc[keyOf(src)];
   if(hit){ // caption / extra tags for a folder photo
     if(d.title&&d.title!==d.upload)hit.title=d.title;
     if(d.desc)hit.desc=d.desc;
@@ -51,7 +59,7 @@ const ALL=[],bySrc={};
   ALL.push({...d,src});
 });
 ALL.forEach((d,i)=>d.seq=i);
-ALL.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(a.src.split('/').slice(0,-1).join('/')===b.src.split('/').slice(0,-1).join('/')?(a.file||'').localeCompare(b.file||'',undefined,{numeric:true}):0)||a.seq-b.seq);
+ALL.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(a.dir&&a.dir===b.dir?(a.file||'').localeCompare(b.file||'',undefined,{numeric:true}):0)||a.seq-b.seq);
 ALL.forEach(d=>{d.embed=embedOf(d.src);d.kind=d.embed?'embed':kindOf(d.src);d.tags=(d.tags||[]).filter(Boolean).map(t=>String(t).trim().toLowerCase());});
 
 /* --- menu: list of pages --- */
