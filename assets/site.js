@@ -2,7 +2,7 @@
 const PROJECTS=window.PROJECTS||[], ALL=window.ITEMS||[];
 const $=id=>document.getElementById(id);
 const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
-const S={page:null,items:[],tags:new Set(),stat:store.get('static')==='1',zoom:-1,wasOff:false};
+const S={order:'time',page:null,items:[],tags:new Set(),stat:store.get('static')==='1',zoom:-1,wasOff:false};
 const mobile=()=>matchMedia('(max-width:760px)').matches;
 const kindOf=src=>/\.gif(\?|$)|^data:image\/gif/i.test(src)?'gif':/\.(mp4|mov|m4v|webm)(\?|$)|^data:video\//i.test(src)?'video':'image';
 /* Vimeo / YouTube links */
@@ -82,6 +82,24 @@ function filter(){
   applyStatic();
 }
 
+/* --- order: time or shuffle (keeps the selected tags) --- */
+function applyOrder(){
+  const cells=[...grid.children];
+  if(S.order==='shuffle'){for(let i=cells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]];}}
+  else cells.sort((a,b)=>a.dataset.i-b.dataset.i);
+  cells.forEach(c=>grid.appendChild(c));
+  $('order').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.o===S.order));
+}
+$('order').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.order=b.dataset.o;applyOrder();window.scrollTo(0,0);});
+
+/* --- light / dark --- */
+function applyTheme(){
+  const dark=document.documentElement.classList.contains('dark'),b=$('theme');
+  b.setAttribute('aria-pressed',dark);b.dataset.label=dark?'Light mode':'Dark mode';b.setAttribute('aria-label',b.dataset.label);
+}
+$('theme').addEventListener('click',()=>{const d=document.documentElement.classList.toggle('dark');store.set('theme',d?'dark':'light');applyTheme();});
+applyTheme();
+
 /* --- static mode --- */
 function freeze(img,canvas){
   if(!img.complete||!img.naturalWidth){img.addEventListener('load',()=>freeze(img,canvas),{once:true});return;}
@@ -89,7 +107,7 @@ function freeze(img,canvas){
   canvas.getContext('2d').drawImage(img,0,0);
 }
 function applyStatic(){
-  $('static').setAttribute('aria-pressed',S.stat);
+  $('motion').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.m==='pause')===S.stat));
   grid.querySelectorAll('.cell').forEach(c=>{
     const v=c.querySelector('video'),cv=c.querySelector('canvas');
     if(v){(S.stat||c.hidden||!S.page||S.zoom>-1)?v.pause():v.play().catch(()=>{});}
@@ -106,7 +124,7 @@ function applyStatic(){
   if(zv){S.stat?zv.pause():zv.play().catch(()=>{});}
   if(zc){if(S.stat)freeze(z.querySelector('img'),zc);z.classList.toggle('frozen',S.stat);}
 }
-$('static').addEventListener('click',()=>{S.stat=!S.stat;store.set('static',S.stat?'1':'0');applyStatic();});
+$('motion').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.stat=b.dataset.m==='pause';store.set('static',S.stat?'1':'0');applyStatic();});
 
 /* --- zoom --- */
 function fillDetail(el,d,pos,total){
@@ -162,7 +180,7 @@ function route(){
   const slug=decodeURIComponent(location.hash.slice(1));
   const proj=PROJECTS.find(p=>p.slug===slug)||null;
   closeZoom();
-  if((proj&&proj.slug)!==S.page){S.page=proj&&proj.slug;S.tags.clear();S.items=proj?ALL.filter(d=>d.p===proj.slug):[];buildGrid();}
+  if((proj&&proj.slug)!==S.page){S.page=proj&&proj.slug;S.tags.clear();S.items=proj?ALL.filter(d=>d.p===proj.slug):[];buildGrid();applyOrder();}
   $('v-grid').hidden=!proj;$('controls').hidden=!proj;
   pagesNav.querySelectorAll('a').forEach(a=>a.classList.toggle('on',a.dataset.slug===S.page));
   if(proj&&mobile())document.body.classList.add('menu-off');
@@ -171,7 +189,7 @@ function route(){
 }
 window.addEventListener('hashchange',route);
 $('home-link').addEventListener('click',e=>{
-  e.preventDefault();S.stat=false;store.set('static','0');S.tags.clear();
+  e.preventDefault();S.stat=false;store.set('static','0');S.tags.clear();S.order='time';applyOrder();document.documentElement.classList.remove('dark');store.set('theme','light');applyTheme();
   history.replaceState(null,'',location.pathname+location.search);route();
 });
 route();

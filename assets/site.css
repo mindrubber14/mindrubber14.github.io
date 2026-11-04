@@ -1,14 +1,17 @@
-/* Layout: fixed hideable menu on the left, edge-to-edge justified photo rows on the right. Single light look on purpose. */
+/* Layout: fixed hideable menu on the left, edge-to-edge justified photo rows on the right.
+   Light by default; the lightbulb button adds .dark to <html> (black, white text, lime highlights). */
 :root{
   color-scheme:light;
-  --bg:#ffffff; --fg:#1c1c1a; --muted:#9b9991; --line:#e6e4de; --soft:#f3f2ee;
+  --bg:#ffffff; --fg:#1c1c1a; --muted:#9b9991; --line:#e6e4de; --soft:#f3f2ee; --accent:#1c1c1a;
+  --text:8pt;
   --mono:"Instrument Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
   --menu:232px; --row:clamp(92px,8.6vw,150px);
 }
+html.dark{color-scheme:dark;--bg:#000000;--fg:#f4f4f0;--muted:#7d7d76;--line:#262624;--soft:#141413;--accent:#c4ff3a}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0}
-body{background:var(--bg);color:var(--fg);font:400 14px/1.45 var(--mono)}
+body{background:var(--bg);color:var(--fg);font:400 var(--text)/1.5 var(--mono);transition:background-color .2s,color .2s}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
 a{color:inherit;text-decoration:none}
 :focus-visible{outline:1px solid var(--fg);outline-offset:2px}
@@ -19,38 +22,51 @@ a{color:inherit;text-decoration:none}
   overflow-y:auto;display:flex;flex-direction:column;gap:28px;transition:transform .28s ease}
 body.menu-off .menu{transform:translateX(-101%)}
 .mhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.reset{display:inline-flex;color:var(--fg)}.reset svg{width:16px;height:16px}.reset:hover{opacity:.6}
-.arrow{display:inline-flex;color:var(--muted)}.arrow svg{width:18px;height:18px}.arrow:hover{color:var(--fg)}
+.reset{display:inline-flex;color:var(--muted)}.reset svg{width:14px;height:14px}.reset:hover{color:var(--fg)}
+.arrow{display:inline-flex;color:var(--muted)}.arrow svg{width:15px;height:15px}.arrow:hover{color:var(--fg)}
 .sect{display:flex;flex-direction:column;gap:2px}
 .sect h2{font:inherit;color:var(--muted);margin:0 0 4px;display:flex;justify-content:space-between}
 .row{display:flex;justify-content:space-between;gap:10px;padding:1px 0}
 .row .n{color:var(--muted);font-variant-numeric:tabular-nums}
 .pages a{color:var(--muted)}
 .pages a:hover,.pages a.on{color:var(--fg)}
-.pages a.on .t{text-decoration:underline;text-underline-offset:3px}
+.pages a.on{color:var(--accent)}
 .tag{color:var(--muted);width:100%}
 .tag:hover{color:var(--fg)}
-.tag.on{color:var(--fg)}
+.tag.on{color:var(--accent)}
 .tag.on .t::before{content:"\25CF\00a0"}
 .tag:not(.on) .t::before{content:"\25CB\00a0"}
 .clear{color:var(--muted)} .clear:hover{color:var(--fg)}
 .switch{display:flex;align-items:center;justify-content:space-between;width:100%}
-.pill{display:inline-flex;border:1px solid var(--fg);font-size:11px;line-height:1}
-.pill span{padding:3px 6px}
+.pill{display:inline-flex;border:1px solid var(--fg);font-size:var(--text);line-height:1}
+.pill span,.pill button{padding:3px 6px;font-size:var(--text);line-height:1}
+.pill button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.hl{display:flex;align-items:center;gap:6px}
+.hl .ic{width:22px;height:22px}.hl .ic svg{width:14px;height:14px}
+#theme::before{display:none}
+.tools{display:flex;gap:16px;align-items:center}
+.seg{display:flex;gap:6px}
+.ic{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;color:var(--muted)}
+.ic svg{width:15px;height:15px}
+.ic:hover{color:var(--fg)}
+.ic[aria-pressed="true"]{color:var(--accent)}
+.ic::after{content:attr(data-label);position:absolute;top:calc(100% + 2px);left:50%;transform:translateX(-50%);white-space:nowrap;
+  color:var(--fg);font-size:var(--text);line-height:1;opacity:0;pointer-events:none;transition:opacity .12s;z-index:5}
+.ic:hover::after,.ic:focus-visible::after{opacity:1;transition-delay:.2s}
 .switch[aria-pressed="true"] .on1,.switch[aria-pressed="false"] .off1{background:var(--fg);color:var(--bg)}
 .detail{display:flex;flex-direction:column;gap:14px}
 .detail .back{color:var(--muted)} .detail .back:hover{color:var(--fg)}
-.detail h3{font:500 14px/1.4 var(--mono);margin:0;text-wrap:balance}
+.detail h3{font:500 var(--text)/1.45 var(--mono);margin:0;text-wrap:balance}
 .detail .date{color:var(--muted)}
 .detail p{margin:0;font-weight:300;max-width:34ch}
 .detail .dtags{display:flex;flex-wrap:wrap;gap:2px 10px}
-.detail .dtags button{color:var(--muted)} .detail .dtags button:hover{color:var(--fg);text-decoration:underline}
+.detail .dtags button{color:var(--muted)} .detail .dtags button:hover{color:var(--fg)}
 .nav{display:flex;justify-content:space-between;color:var(--muted)}
 .nav button:hover{color:var(--fg)}
 
 .open-menu{position:fixed;z-index:25;top:calc(14px + env(safe-area-inset-top,0px));left:max(14px,env(safe-area-inset-left,0px));
   background:var(--bg);padding:3px;display:inline-flex;color:var(--muted);opacity:0;pointer-events:none;transition:opacity .2s}
-.open-menu svg{width:18px;height:18px}
+.open-menu svg{width:15px;height:15px}
 body.menu-off .open-menu{opacity:1;pointer-events:auto}
 .open-menu:hover{color:var(--fg)}
 
