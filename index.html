@@ -54,7 +54,14 @@
 </div>
 
 <script>
-window.PROJECTS=[];window.ITEMS=[];
+window.PROJECTS=[];window.ITEMS=[];window.FILES=[];
+{%- comment -%} Every photo/video inside media/<page>/<folder>/ shows up automatically {%- endcomment -%}
+{%- for f in site.static_files -%}
+  {%- assign parts = f.path | split: "/" -%}
+  {%- if parts[1] == "media" and parts.size > 3 %}
+FILES.push({{ f.path | jsonify }});
+  {%- endif -%}
+{%- endfor -%}
 {%- assign none = "" | split: "" -%}
 {%- assign projects = site.projects | sort: "order" -%}
 {%- for p in projects %}
@@ -75,14 +82,14 @@ PROJECTS.push({slug:{{ p.slug | jsonify }},title:{{ p.title | jsonify }}});
     {%- assign nt = note.tags | default: none -%}
     {%- assign tl = note.title | default: u.title -%}
     {%- assign cp = note.caption | default: u.caption | default: "" %}
-ITEMS.push({p:{{ key | jsonify }},src:{{ f | relative_url | jsonify }},date:{{ d | jsonify }},title:{{ tl | jsonify }},desc:{{ cp | jsonify }},tags:{{ ut | concat: nt | uniq | jsonify }}});
+ITEMS.push({upload:{{ u.title | jsonify }},p:{{ key | jsonify }},src:{{ f | relative_url | jsonify }},date:{{ d | jsonify }},title:{{ tl | jsonify }},desc:{{ cp | jsonify }},tags:{{ ut | concat: nt | uniq | jsonify }}});
   {%- endfor -%}
   {%- for n in notes -%}
     {%- unless files contains n.file -%}{%- if n.file -%}
     {%- assign nt = n.tags | default: none -%}
     {%- assign tl = n.title | default: u.title -%}
     {%- assign cp = n.caption | default: u.caption | default: "" %}
-ITEMS.push({p:{{ key | jsonify }},src:{{ n.file | relative_url | jsonify }},date:{{ d | jsonify }},title:{{ tl | jsonify }},desc:{{ cp | jsonify }},tags:{{ ut | concat: nt | uniq | jsonify }}});
+ITEMS.push({upload:{{ u.title | jsonify }},p:{{ key | jsonify }},src:{{ n.file | relative_url | jsonify }},date:{{ d | jsonify }},title:{{ tl | jsonify }},desc:{{ cp | jsonify }},tags:{{ ut | concat: nt | uniq | jsonify }}});
     {%- endif -%}{%- endunless -%}
   {%- endfor -%}
 {%- endfor %}

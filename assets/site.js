@@ -1,5 +1,5 @@
 (function(){
-const PROJECTS=window.PROJECTS||[], ALL=window.ITEMS||[];
+const PROJECTS=window.PROJECTS||[];
 const $=id=>document.getElementById(id);
 const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 const S={order:'time',page:null,items:[],tags:new Set(),stat:store.get('static')==='1',zoom:-1,wasOff:false};
@@ -23,6 +23,35 @@ function thumbFor(d,cb){
   fetch('https://vimeo.com/api/oembed.json?width=960&url='+encodeURIComponent(d.src))
     .then(r=>r.json()).then(j=>cb(j.thumbnail_url,j.width,j.height)).catch(()=>cb('',16,9));
 }
+/* Build the item list: folder photos first, then Pages CMS uploads (which can add captions/tags to folder photos) */
+const MEDIA_RE=/\.(jpe?g|png|gif|webp|avif|mp4|mov|m4v|webm)$/i;
+const enc=s=>/^\//.test(s)&&!/%[0-9a-f]{2}/i.test(s)?encodeURI(s):s;
+const slugify=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const ALL=[],bySrc={};
+(window.FILES||[]).forEach(path=>{
+  if(!MEDIA_RE.test(path))return;
+  const parts=path.split('/');               // ["", "media", page, folder..., file]
+  const page=slugify(parts[2]);
+  const folder=parts.length>4?parts[3]:'';
+  const m=folder.match(/^(\d{4}-\d{2}-\d{2})\s*(.*)$/);
+  const date=m?m[1]:'';
+  const tags=(m?m[2]:folder).split(',').map(t=>t.trim()).filter(Boolean);
+  const d={p:page,src:enc(path),date,title:'',desc:'',tags,file:parts[parts.length-1]};
+  ALL.push(d);bySrc[d.src]=d;
+  if(!PROJECTS.some(x=>x.slug===page))PROJECTS.push({slug:page,title:parts[2].replace(/[-_]+/g,' ').replace(/^./,c=>c.toUpperCase()),auto:true});
+});
+(window.ITEMS||[]).forEach(d=>{
+  const src=enc(d.src),hit=bySrc[src];
+  if(hit){ // caption / extra tags for a folder photo
+    if(d.title&&d.title!==d.upload)hit.title=d.title;
+    if(d.desc)hit.desc=d.desc;
+    hit.tags=[...new Set([...hit.tags,...(d.tags||[])])];
+    return;
+  }
+  ALL.push({...d,src});
+});
+ALL.forEach((d,i)=>d.seq=i);
+ALL.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(a.src.split('/').slice(0,-1).join('/')===b.src.split('/').slice(0,-1).join('/')?(a.file||'').localeCompare(b.file||'',undefined,{numeric:true}):0)||a.seq-b.seq);
 ALL.forEach(d=>{d.embed=embedOf(d.src);d.kind=d.embed?'embed':kindOf(d.src);d.tags=(d.tags||[]).filter(Boolean).map(t=>String(t).trim().toLowerCase());});
 
 /* --- menu: list of pages --- */
