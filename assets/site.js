@@ -44,9 +44,11 @@ const keyOf=src=>{const e=embedOf(src);return e?e.type+':'+e.id:dec(src);};
   const folder=parts.length>4?parts[3]:'';
   const m=folder.match(/^(\d{4}-\d{2}-\d{2})\s*(.*)$/);
   const date=m?m[1]:'';
-  const tags=(m?m[2]:folder).split(',').map(t=>t.trim()).filter(Boolean);
+  // only words after # are tags, in folder names and file names alike: "2023-04-01 uluru trip #uluru 2023"
+  const hashTags=t=>t.split('#').slice(1).map(x=>x.replace(/[,\s]+$/,'').trim()).filter(Boolean);
+  const tags=hashTags(folder);
   // tags in the file name: "S1280035 #beach #nikon coolpix.jpg"
-  parts[parts.length-1].replace(/\.[^.]+$/,'').split('#').slice(1).map(t=>t.trim()).filter(Boolean).forEach(t=>tags.push(t));
+  hashTags(parts[parts.length-1].replace(/\.[^.]+$/,'')).forEach(t=>tags.push(t));
   const d={p:page,src,date,title:'',desc:'',tags,file:parts[parts.length-1],dir:parts.slice(0,-1).join('/')};
   ALL.push(d);bySrc[keyOf(src)]=d;
   if(!PROJECTS.some(x=>x.slug===page))PROJECTS.push({slug:page,title:parts[2].replace(/[-_]+/g,' ').replace(/^./,c=>c.toUpperCase()),auto:true});
