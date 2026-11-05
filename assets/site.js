@@ -25,10 +25,11 @@ function thumbFor(d,cb){
 }
 /* Build the item list: folder photos first, then Pages CMS uploads (which can add captions/tags to folder photos) */
 const MEDIA_RE=/\.(jpe?g|png|gif|webp|avif|mp4|mov|m4v|webm)$/i;
-const enc=s=>/^\//.test(s)&&!/%[0-9a-f]{2}/i.test(s)?encodeURI(s):s;
+const dec=s=>{try{return decodeURIComponent(s)}catch(e){return s}};
+const enc=s=>/^\//.test(s)?dec(s).split('/').map(encodeURIComponent).join('/'):s;  // file names may contain spaces, commas and #
 const slugify=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const ALL=[],bySrc={};
-const keyOf=src=>{const e=embedOf(src);return e?e.type+':'+e.id:src;};
+const keyOf=src=>{const e=embedOf(src);return e?e.type+':'+e.id:dec(src);};
 (window.FILES||[]).forEach(path=>{
   const isLink=/\.txt$/i.test(path);          // e.g. "DSCN0028 vimeo 123456789.txt" = a Vimeo video placed in the folder
   if(!MEDIA_RE.test(path)&&!isLink)return;
@@ -44,6 +45,8 @@ const keyOf=src=>{const e=embedOf(src);return e?e.type+':'+e.id:src;};
   const m=folder.match(/^(\d{4}-\d{2}-\d{2})\s*(.*)$/);
   const date=m?m[1]:'';
   const tags=(m?m[2]:folder).split(',').map(t=>t.trim()).filter(Boolean);
+  // tags in the file name: "S1280035 #beach #nikon coolpix.jpg"
+  parts[parts.length-1].replace(/\.[^.]+$/,'').split('#').slice(1).map(t=>t.trim()).filter(Boolean).forEach(t=>tags.push(t));
   const d={p:page,src,date,title:'',desc:'',tags,file:parts[parts.length-1],dir:parts.slice(0,-1).join('/')};
   ALL.push(d);bySrc[keyOf(src)]=d;
   if(!PROJECTS.some(x=>x.slug===page))PROJECTS.push({slug:page,title:parts[2].replace(/[-_]+/g,' ').replace(/^./,c=>c.toUpperCase()),auto:true});
