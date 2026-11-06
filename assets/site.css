@@ -4,6 +4,7 @@
   color-scheme:light;
   --bg:#ffffff; --fg:#1c1c1a; --muted:#9b9991; --line:#e6e4de; --soft:#f3f2ee; --accent:#1c1c1a;
   --text:8pt;
+  --zoom-size:70%;  /* size of a clicked photo (100% = as big as fits, 50% = half) */
   --grid-soften:0.6px;  /* how soft the soft_tags photos look in the grid (0.3px subtle, 1px soft) */
   --mono:"Instrument Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
   --menu:232px; --row:clamp(92px,8.6vw,150px);
@@ -92,11 +93,11 @@ body.menu-off main{margin-left:0}
 .zoom{position:fixed;top:0;bottom:0;right:0;left:var(--menu);z-index:20;background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;padding:calc(32px + env(safe-area-inset-top,0px)) max(32px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) 32px;cursor:zoom-out}
 .zoom .stage{position:relative;flex:1;width:100%;min-height:0;display:flex;align-items:center;justify-content:center}
-.zoom img,.zoom video,.zoom canvas,.zoom iframe{position:absolute;inset:25%;width:50%;height:50%;object-fit:contain;display:block}
+.zoom img,.zoom video,.zoom canvas,.zoom iframe{position:absolute;width:var(--zoom-size);height:var(--zoom-size);left:calc((100% - var(--zoom-size)) / 2);top:calc((100% - var(--zoom-size)) / 2);object-fit:contain;display:block}
 .zoom img,.zoom canvas{cursor:zoom-in}
 /* second click: the photo goes full screen */
 .zoom .stage:fullscreen{background:var(--bg)}
-.zoom .stage:fullscreen>*,.zoom.big .stage>*{inset:0;width:100%;height:100%;cursor:zoom-out}
+.zoom .stage:fullscreen>*,.zoom.big .stage>*{left:0;top:0;width:100%;height:100%;cursor:zoom-out}
 .zoom canvas{display:none}
 .zoom iframe{border:0}
 .zoom.frozen canvas{display:block}.zoom.frozen img{display:none}
@@ -111,7 +112,7 @@ body.menu-off main{margin-left:0}
   main{margin-left:0!important}
   .menu{box-shadow:0 0 0 100vmax rgba(0,0,0,0);}
   body:not(.menu-off) .menu{box-shadow:0 0 0 100vmax rgba(0,0,0,.18)}
-  .zoom .stage>*{inset:0;width:100%;height:100%}
+  .zoom .stage>*{left:0;top:0;width:100%;height:100%}
   .zoom{left:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   .zcap{display:flex;width:100%;padding-top:16px;cursor:default}
   .menu .detail{display:none}
