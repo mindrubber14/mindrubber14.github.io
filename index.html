@@ -55,6 +55,7 @@
 
 <script>
 window.PROJECTS=[];window.ITEMS=[];window.FILES=[];
+window.SOFT={{ site.soft_tags | jsonify }};
 {%- comment -%} Every photo/video inside media/<page>/<folder>/ shows up automatically {%- endcomment -%}
 {%- for f in site.static_files -%}
   {%- assign parts = f.path | split: "/" -%}

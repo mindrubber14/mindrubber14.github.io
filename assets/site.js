@@ -77,6 +77,10 @@ PROJECTS.forEach(p=>{
   pagesNav.appendChild(a);
 });
 
+/* soft tags (from _config.yml): matching items are softened in the grid */
+const SOFT=new Set(((window.SOFT)||[]).map(t=>String(t).trim().toLowerCase()));
+const isSoft=d=>d.tags.some(t=>SOFT.has(t));
+
 /* --- grid --- */
 const grid=$('grid'),tagBox=$('tags');
 const io='IntersectionObserver' in window?new IntersectionObserver(es=>{es.forEach(en=>{en.target.dataset.inview=en.isIntersecting?'1':'';});applyStatic();},{rootMargin:'200px'}):null;
@@ -84,7 +88,7 @@ function setRatio(cell,w,h){if(w&&h){const r=(w/h).toFixed(3);cell.style.flexGro
 function buildGrid(){
   grid.innerHTML='';
   S.items.forEach((d,i)=>{
-    const b=document.createElement('button');b.className='cell';b.dataset.i=i;
+    const b=document.createElement('button');b.className='cell'+(isSoft(d)?' soft':'');b.dataset.i=i;
     setRatio(b,3,2);b.setAttribute('aria-label',d.title||'Photo');
     let m;
     if(d.kind==='video'){

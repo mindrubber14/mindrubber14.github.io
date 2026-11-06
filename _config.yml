@@ -1,5 +1,11 @@
 # Technical settings. You normally don't need to edit this file.
 # Add photos and pages at https://app.pagescms.org
+
+# Photos and videos with any of these tags look slightly soft in the grid
+# (they're still sharp when you click to view them). Add or remove tags here.
+soft_tags:
+  - fuji
+  - uluru 2023
 title: Everyday
 timezone: Australia/Sydney
 collections:
