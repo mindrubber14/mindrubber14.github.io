@@ -4,7 +4,7 @@
   color-scheme:light;
   --bg:#ffffff; --fg:#1c1c1a; --muted:#9b9991; --line:#e6e4de; --soft:#f3f2ee; --accent:#1c1c1a;
   --text:8pt;
-  --grid-soften:0.6px;  /* softness of photos in the grid only (0px = off, 1px = soft) */
+  --grid-soften:0.9px;  /* softness of photos in the grid only (0px = off, 1px = soft) */
   --mono:"Instrument Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
   --menu:232px; --row:clamp(92px,8.6vw,150px);
 }
