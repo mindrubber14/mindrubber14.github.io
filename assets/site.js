@@ -211,6 +211,7 @@ function openZoom(i){
   applyStatic();
 }
 function closeZoom(){
+  if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});$('zoom').classList.remove('big');
   if(S.zoom<0)return;S.zoom=-1;$('zoom').hidden=true;$('stage').innerHTML='';
   $('detail').hidden=true;$('controls').hidden=!S.page;
   if(S.wasOff){document.body.classList.add('menu-off');S.wasOff=false;}
@@ -225,7 +226,17 @@ function detailClick(e){
   else if(b.dataset.tag){S.tags.clear();S.tags.add(b.dataset.tag);closeZoom();filter();}
 }
 $('detail').addEventListener('click',detailClick);$('zcap').addEventListener('click',detailClick);
-$('zoom').addEventListener('click',e=>{if(!e.target.closest('.zcap'))closeZoom();});
+$('zoom').addEventListener('click',e=>{
+  if(e.target.closest('.zcap'))return;
+  if(e.target.matches('#stage img,#stage canvas')){toggleFull();return;}   // click the photo: full screen / back
+  closeZoom();
+});
+function toggleFull(){
+  const st=$('stage'),z=$('zoom');
+  if(document.fullscreenElement){document.exitFullscreen().catch(()=>{});return;}
+  if(z.classList.contains('big')){z.classList.remove('big');return;}
+  if(st.requestFullscreen)st.requestFullscreen().catch(()=>z.classList.add('big'));else z.classList.add('big');
+}
 document.addEventListener('keydown',e=>{
   if(S.zoom<0)return;
   if(e.key==='Escape')closeZoom();else if(e.key==='ArrowRight')step(1);else if(e.key==='ArrowLeft')step(-1);
