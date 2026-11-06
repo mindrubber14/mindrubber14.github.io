@@ -109,7 +109,3 @@ body.menu-off main{margin-left:0}
   .menu .detail{display:none}
 }
 
-/* black and white mode: photos and videos only; hover a tile to see it in colour */
-html.bw .cell img,html.bw .cell video,html.bw .cell canvas,html.bw .cell iframe,html.bw .zoom .stage>*{filter:grayscale(1)}
-html.bw .cell:hover img,html.bw .cell:hover video,html.bw .cell:hover canvas,html.bw .cell:hover iframe{filter:none}
-#bw::before{display:none}

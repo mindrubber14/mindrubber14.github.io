@@ -141,12 +141,6 @@ function applyTheme(){
 }
 $('theme').addEventListener('click',()=>{const d=document.documentElement.classList.toggle('dark');store.set('theme',d?'dark':'light');applyTheme();});
 applyTheme();
-function applyBW(){
-  const on=document.documentElement.classList.contains('bw'),b=$('bw');
-  b.setAttribute('aria-pressed',on);b.dataset.label=on?'Colour':'Black and white';b.setAttribute('aria-label',b.dataset.label);
-}
-$('bw').addEventListener('click',()=>{const on=document.documentElement.classList.toggle('bw');store.set('bw',on?'1':'0');applyBW();});
-applyBW();
 
 /* Vimeo/YouTube in the grid: size the player so the video covers its tile edge to edge */
 function fitFrame(c,f,vr){
@@ -251,7 +245,7 @@ function route(){
 }
 window.addEventListener('hashchange',route);
 $('home-link').addEventListener('click',e=>{
-  e.preventDefault();document.body.classList.add('menu-off');S.wasOff=false;S.stat=false;store.set('static','0');S.tags.clear();S.order='time';applyOrder();document.documentElement.classList.remove('dark','bw');store.set('theme','light');store.set('bw','0');applyTheme();applyBW();
+  e.preventDefault();document.body.classList.add('menu-off');S.wasOff=false;S.stat=false;store.set('static','0');S.tags.clear();S.order='time';applyOrder();document.documentElement.classList.remove('dark','bw');store.set('theme','light');applyTheme();
   history.replaceState(null,'',location.pathname+location.search);route();
 });
 route();
