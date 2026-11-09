@@ -29,8 +29,25 @@ const dec=s=>{try{return decodeURIComponent(s)}catch(e){return s}};
 const enc=s=>/^\//.test(s)?dec(s).split('/').map(encodeURIComponent).join('/'):s;  // file names may contain spaces, commas and #
 const slugify=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const ALL=[],bySrc={};
+const CAPS={},capCache={};
+/* captions.txt: one line per photo, "IMG_2084: caption text". Loaded only when a photo is opened. */
+function loadCaptions(dir){
+  if(!capCache[dir])capCache[dir]=fetch(enc(CAPS[dir])).then(r=>r.ok?r.text():'').then(t=>{
+    const map={};
+    t.replace(/^\uFEFF/,'').split(/\r?\n/).forEach(line=>{const k=line.indexOf(':');if(k>0){const name=line.slice(0,k).trim().toLowerCase(),cap=line.slice(k+1).trim();if(name&&cap)map[name]=cap;}});
+    return map;
+  }).catch(()=>({}));
+  return capCache[dir];
+}
+function captionFor(d,map){
+  const base=(d.file||'').replace(/\.[^.]+$/,'').split('#')[0].trim().toLowerCase();
+  if(map[base])return map[base];
+  const k=Object.keys(map).find(n=>base.startsWith(n+' '));   // "S9400084" matches "S9400084 vimeo 903194968"
+  return k?map[k]:'';
+}
 const keyOf=src=>{const e=embedOf(src);return e?e.type+':'+e.id:dec(src);};
 (window.FILES||[]).forEach(path=>{
+  if(/\/captions\.txt$/i.test(path)){CAPS[path.split('/').slice(0,-1).join('/')]=path;return;}  // a folder's captions file
   const isLink=/\.txt$/i.test(path);          // e.g. "DSCN0028 vimeo 123456789.txt" = a Vimeo video placed in the folder
   if(!MEDIA_RE.test(path)&&!isLink)return;
   const parts=path.split('/');               // ["", "media", page, folder..., file]
@@ -206,6 +223,10 @@ function openZoom(i){
   else{m=document.createElement('img');m.src=d.src;m.alt=d.title||'';}
   st.appendChild(m);if(d.kind==='gif')st.appendChild(document.createElement('canvas'));
   fillDetail($('detail'),d,pos+1,list.length);fillDetail($('zcap'),d,pos+1,list.length);
+  if(!d.desc&&d.dir&&CAPS[d.dir])loadCaptions(d.dir).then(map=>{
+    const c=captionFor(d,map);
+    if(c&&S.zoom===i){d.desc=c;fillDetail($('detail'),d,pos+1,list.length);fillDetail($('zcap'),d,pos+1,list.length);}
+  });
   $('detail').hidden=false;$('controls').hidden=true;$('zoom').hidden=false;
   if(!mobile()&&document.body.classList.contains('menu-off')){S.wasOff=true;document.body.classList.remove('menu-off');}
   applyStatic();
