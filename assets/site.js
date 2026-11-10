@@ -206,10 +206,9 @@ $('motion').addEventListener('click',e=>{const b=e.target.closest('button');if(!
 
 /* --- zoom --- */
 function fillDetail(el,d,pos,total){
-  el.innerHTML='<button class="back" data-act="close">← Back to grid</button><div><h3></h3><div class="date"></div></div><p></p><div class="dtags"></div>'+
+  el.innerHTML='<button class="back" data-act="close">← Back to grid</button><div><h3></h3></div><p></p><div class="dtags"></div>'+
     '<div class="nav"><button data-act="prev">← Prev</button><span>'+pos+' / '+total+'</span><button data-act="next">Next →</button></div>';
   el.querySelector('h3').textContent=d.title||'';
-  el.querySelector('.date').textContent=d.date?new Date(d.date+'T00:00').toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'';
   const p=el.querySelector('p');if(d.desc)p.textContent=d.desc;else p.remove();
   const tg=el.querySelector('.dtags');
   d.tags.forEach(t=>{const b=document.createElement('button');b.dataset.tag=t;b.textContent='#'+t;tg.appendChild(b);});
