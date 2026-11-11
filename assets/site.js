@@ -180,9 +180,9 @@ function applyOrder(){
 $('order').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.order=b.dataset.o;applyOrder();window.scrollTo(0,0);});
 
 /* --- light / dark --- */
-/* lightbulb: click to cycle split (dark photos, light menu; the default) -> light -> dark -> split */
-const THEMES=['split','light','dark'],THEME_LABEL={split:'Split',light:'Light',dark:'Dark'};
-const curTheme=()=>document.documentElement.classList.contains('dark')?'dark':document.documentElement.classList.contains('split')?'split':'light';
+/* lightbulb: switches between split (dark photos, light menu; the default) and light */
+const THEMES=['split','light'],THEME_LABEL={split:'Split',light:'Light'};
+const curTheme=()=>document.documentElement.classList.contains('split')?'split':'light';
 function setTheme(t){const h=document.documentElement;h.classList.remove('dark','split');if(t!=='light')h.classList.add(t);store.set('theme',t);applyTheme();}
 function applyTheme(){
   const t=curTheme(),next=THEMES[(THEMES.indexOf(t)+1)%THEMES.length],b=$('theme');
@@ -201,7 +201,7 @@ const refit=()=>grid.querySelectorAll('.cell iframe').forEach(f=>{const c=f.pare
 window.addEventListener('resize',refit);
 
 /* photo size: magnifying glass − / + (and the - / + keys). Starts at the smallest size. */
-const SIZES=[1,1.5,2,3,4];let sizeI=0;
+const SIZES=[1,1.5,2,3,4];let sizeI=1;   // starts one step up from the smallest
 function applySize(){
   document.documentElement.style.setProperty('--row-scale',SIZES[sizeI]);
   $('size').querySelector('[data-z="-1"]').disabled=sizeI===0;
@@ -331,9 +331,5 @@ function route(){
   filter();window.scrollTo(0,0);
 }
 window.addEventListener('hashchange',route);
-$('home-link').addEventListener('click',e=>{
-  e.preventDefault();document.body.classList.remove('menu-off');S.wasOff=false;S.stat=false;store.set('static','0');S.tags.clear();S.order='shuffle';applyOrder();sizeI=0;applySize();document.documentElement.classList.remove('bw');setTheme('split');
-  history.replaceState(null,'',location.pathname+location.search);route();
-});
 route();
 })();
