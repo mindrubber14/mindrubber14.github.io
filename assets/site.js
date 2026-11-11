@@ -2,7 +2,7 @@
 const PROJECTS=window.PROJECTS||[];
 const $=id=>document.getElementById(id);
 const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
-const S={order:'time',page:null,items:[],tags:new Set(),stat:store.get('static')==='1',zoom:-1,wasOff:false};
+const S={order:'shuffle',page:null,items:[],tags:new Set(),stat:store.get('static')==='1',zoom:-1,wasOff:false};
 const mobile=()=>matchMedia('(max-width:760px)').matches;
 const AUDIO_RE=/\.(mp3|wav|m4a|aac|ogg|oga|flac|aif|aiff)(\?|$)/i;
 const kindOf=src=>AUDIO_RE.test(src)?'audio':/\.gif(\?|$)|^data:image\/gif/i.test(src)?'gif':/\.(mp4|mov|m4v|webm)(\?|$)|^data:video\//i.test(src)?'video':'image';
@@ -311,7 +311,7 @@ function route(){
 }
 window.addEventListener('hashchange',route);
 $('home-link').addEventListener('click',e=>{
-  e.preventDefault();document.body.classList.add('menu-off');S.wasOff=false;S.stat=false;store.set('static','0');S.tags.clear();S.order='time';applyOrder();document.documentElement.classList.remove('dark','bw');store.set('theme','light');applyTheme();
+  e.preventDefault();document.body.classList.remove('menu-off');S.wasOff=false;S.stat=false;store.set('static','0');S.tags.clear();S.order='shuffle';applyOrder();document.documentElement.classList.remove('dark','bw');store.set('theme','light');applyTheme();
   history.replaceState(null,'',location.pathname+location.search);route();
 });
 route();

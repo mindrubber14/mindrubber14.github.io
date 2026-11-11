@@ -10,7 +10,7 @@
   --name-size:6pt;  /* size of the small name under each photo */
   --grid-soften:0.5px;  /* how soft the soft_tags photos look in the grid (0.3px subtle, 1px soft) */
   --mono:"Instrument Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
-  --menu:232px; --row:clamp(92px,8.6vw,150px);
+  --menu:232px; --row:clamp(46px,4.3vw,75px);  /* photo height in the grid */
 }
 html.dark{color-scheme:dark;--bg:#000000;--fg:#f4f4f0;--muted:#7d7d76;--line:#262624;--soft:#141413;--accent:#c4ff3a}
 *{box-sizing:border-box}
@@ -115,7 +115,7 @@ body.menu-off .zoom{left:0}
 
 /* ---------- phones ---------- */
 @media (max-width:760px){
-  :root{--row:84px;--menu:min(82vw,300px)}
+  :root{--row:42px;--menu:min(82vw,300px)}
   main{margin-left:0!important}
   .menu{box-shadow:0 0 0 100vmax rgba(0,0,0,0);}
   body:not(.menu-off) .menu{box-shadow:0 0 0 100vmax rgba(0,0,0,.18)}
