@@ -5,7 +5,7 @@
   --bg:#ffffff; --fg:#1c1c1a; --muted:#9b9991; --line:#e6e4de; --soft:#f3f2ee; --accent:#1c1c1a;
   --text:8pt;
   --zoom-size:50%;  /* size of a clicked photo (100% = as big as fits, 50% = half) */
-  --grid-soften:0.6px;  /* how soft the soft_tags photos look in the grid (0.3px subtle, 1px soft) */
+  --grid-soften:0.3px;  /* how soft the soft_tags photos look in the grid (0.3px subtle, 1px soft) */
   --mono:"Instrument Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
   --menu:232px; --row:clamp(92px,8.6vw,150px);
 }

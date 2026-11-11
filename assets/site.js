@@ -236,7 +236,7 @@ function openZoom(i){
   const already=S.zoom>-1;   // moving to next/prev photo: keep the menu as it is
   S.zoom=i;const d=S.items[i],st=$('stage');st.innerHTML='';
   let m;
-  if(d.kind==='video'){m=document.createElement('video');m.src=d.src;m.muted=true;m.loop=true;m.playsInline=true;m.controls=true;m.addEventListener('click',e=>e.stopPropagation());}
+  if(d.kind==='video'){m=document.createElement('video');m.src=d.src;m.muted=false;m.loop=true;m.playsInline=true;m.controls=true;m.addEventListener('click',e=>e.stopPropagation());}
   else if(d.kind==='audio'){
     m=document.createElement('div');m.className='audiozoom';m.addEventListener('click',e=>e.stopPropagation());
     if(d.cover){const c=document.createElement('img');c.src=d.cover;c.alt=d.title;m.appendChild(c);}
