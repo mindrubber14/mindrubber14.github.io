@@ -10,7 +10,8 @@
   --name-size:6pt;  /* size of the small name under each photo */
   --grid-soften:0.5px;  /* how soft the soft_tags photos look in the grid (0.3px subtle, 1px soft) */
   --mono:"Instrument Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
-  --menu:232px; --row:clamp(46px,4.3vw,75px);  /* photo height in the grid */
+  --menu:232px; --row-base:clamp(46px,4.3vw,75px);  /* smallest photo height in the grid */
+  --row-scale:1; --row:calc(var(--row-base) * var(--row-scale));
 }
 html.dark{color-scheme:dark;--bg:#000000;--fg:#f4f4f0;--muted:#7d7d76;--line:#262624;--soft:#141413;--accent:#c4ff3a}
 *{box-sizing:border-box}
@@ -55,6 +56,7 @@ body.menu-off .menu{transform:translateX(-101%)}
 .ic svg{width:15px;height:15px}
 .ic:hover{color:var(--fg)}
 .ic[aria-pressed="true"]{color:var(--accent)}
+.ic:disabled{opacity:.3;cursor:default}
 .ic::after{content:attr(data-label);position:absolute;top:calc(100% + 2px);left:50%;transform:translateX(-50%);white-space:nowrap;
   color:var(--fg);font-size:var(--text);line-height:1;opacity:0;pointer-events:none;z-index:5}
 .ic:hover::after,.ic:focus-visible::after{opacity:1}
@@ -115,7 +117,7 @@ body.menu-off .zoom{left:0}
 
 /* ---------- phones ---------- */
 @media (max-width:760px){
-  :root{--row:42px;--menu:min(82vw,300px)}
+  :root{--row-base:42px;--menu:min(82vw,300px)}
   main{margin-left:0!important}
   .menu{box-shadow:0 0 0 100vmax rgba(0,0,0,0);}
   body:not(.menu-off) .menu{box-shadow:0 0 0 100vmax rgba(0,0,0,.18)}

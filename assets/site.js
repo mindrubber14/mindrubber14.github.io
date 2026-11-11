@@ -193,7 +193,24 @@ function fitFrame(c,f,vr){
   const w=Math.max(1,vr/cr)*100,h=Math.max(1,cr/vr)*100;
   f.style.width=w+'%';f.style.height=h+'%';f.style.left=(100-w)/2+'%';f.style.top=(100-h)/2+'%';
 }
-window.addEventListener('resize',()=>grid.querySelectorAll('.cell iframe').forEach(f=>{const c=f.parentElement;fitFrame(c,f,S.items[c.dataset.i]&&S.items[c.dataset.i].vr);}));
+const refit=()=>grid.querySelectorAll('.cell iframe').forEach(f=>{const c=f.parentElement;fitFrame(c,f,S.items[c.dataset.i]&&S.items[c.dataset.i].vr);});
+window.addEventListener('resize',refit);
+
+/* photo size: magnifying glass − / + (and the - / + keys). Starts at the smallest size. */
+const SIZES=[1,1.5,2,3,4];let sizeI=0;
+function applySize(){
+  document.documentElement.style.setProperty('--row-scale',SIZES[sizeI]);
+  $('size').querySelector('[data-z="-1"]').disabled=sizeI===0;
+  $('size').querySelector('[data-z="1"]').disabled=sizeI===SIZES.length-1;
+  requestAnimationFrame(refit);
+}
+function stepSize(n){sizeI=Math.max(0,Math.min(SIZES.length-1,sizeI+n));applySize();}
+$('size').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.disabled)stepSize(+b.dataset.z);});
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey||S.zoom>-1||/input|textarea|select/i.test(e.target.tagName))return;
+  if(e.key==='-'||e.key==='_')stepSize(-1);else if(e.key==='+'||e.key==='=')stepSize(1);
+});
+applySize();
 
 /* Keyboard: S shuffles (press again to reshuffle) */
 document.addEventListener('keydown',e=>{
@@ -311,7 +328,7 @@ function route(){
 }
 window.addEventListener('hashchange',route);
 $('home-link').addEventListener('click',e=>{
-  e.preventDefault();document.body.classList.remove('menu-off');S.wasOff=false;S.stat=false;store.set('static','0');S.tags.clear();S.order='shuffle';applyOrder();document.documentElement.classList.remove('dark','bw');store.set('theme','light');applyTheme();
+  e.preventDefault();document.body.classList.remove('menu-off');S.wasOff=false;S.stat=false;store.set('static','0');S.tags.clear();S.order='shuffle';applyOrder();sizeI=0;applySize();document.documentElement.classList.remove('dark','bw');store.set('theme','light');applyTheme();
   history.replaceState(null,'',location.pathname+location.search);route();
 });
 route();
