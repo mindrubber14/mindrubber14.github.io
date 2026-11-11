@@ -215,6 +215,7 @@ function fillDetail(el,d,pos,total){
 }
 function openZoom(i){
   const list=visible(),pos=list.indexOf(i);if(pos<0)return;
+  const already=S.zoom>-1;   // moving to next/prev photo: keep the menu as it is
   S.zoom=i;const d=S.items[i],st=$('stage');st.innerHTML='';
   let m;
   if(d.kind==='video'){m=document.createElement('video');m.src=d.src;m.muted=true;m.loop=true;m.playsInline=true;m.controls=true;m.addEventListener('click',e=>e.stopPropagation());}
@@ -227,7 +228,7 @@ function openZoom(i){
     if(c&&S.zoom===i){d.desc=c;fillDetail($('detail'),d,pos+1,list.length);fillDetail($('zcap'),d,pos+1,list.length);}
   });
   $('detail').hidden=false;$('controls').hidden=true;$('zoom').hidden=false;
-  if(!mobile()&&document.body.classList.contains('menu-off')){S.wasOff=true;document.body.classList.remove('menu-off');}
+  if(!already&&!mobile()&&document.body.classList.contains('menu-off')){S.wasOff=true;document.body.classList.remove('menu-off');}
   applyStatic();
 }
 function closeZoom(){
