@@ -116,11 +116,15 @@ const SOUND_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 /* --- grid --- */
 const grid=$('grid'),tagBox=$('tags');
 const io='IntersectionObserver' in window?new IntersectionObserver(es=>{es.forEach(en=>{en.target.dataset.inview=en.isIntersecting?'1':'';});applyStatic();},{rootMargin:'200px'}):null;
-function setRatio(cell,w,h){if(w&&h){const r=(w/h).toFixed(3);cell.style.flexGrow=r;cell.style.width='calc('+r+' * var(--row))';}}
+function setRatio(cell,w,h){if(w&&h){const t=cell.closest('.fig')||cell,r=(w/h).toFixed(3);t.style.flexGrow=r;t.style.width='calc('+r+' * var(--row))';}}
+/* the small name under each photo: file name without tags, date or ending ("DSCF4078") */
+const nameOf=d=>d.file?d.file.replace(/\.[^.]+$/,'').split('#')[0].replace(/^\d{4}-\d{2}-\d{2}\s*/,'').split(/\s+(?:vimeo|youtube|youtu\.?be)\s/i)[0].trim():(d.title||'');
 function buildGrid(){
   grid.innerHTML='';
   S.items.forEach((d,i)=>{
-    const b=document.createElement('button');b.className='cell'+(isSoft(d)?' soft':'');b.dataset.i=i;
+    const fig=document.createElement('div');fig.className='fig';fig.dataset.i=i;
+    const b=document.createElement('button');b.className='cell'+(isSoft(d)?' soft':'');b.dataset.i=i;fig.appendChild(b);
+    const nm=document.createElement('span');nm.className='name';nm.textContent=nameOf(d);fig.appendChild(nm);
     setRatio(b,3,2);b.setAttribute('aria-label',d.title||'Photo');
     let m;
     if(d.kind==='video'){
@@ -142,7 +146,7 @@ function buildGrid(){
     if(d.kind==='audio'&&d.cover){const k=document.createElement('span');k.className='akey';k.innerHTML=SOUND_ICON;b.appendChild(k);}
     if(d.kind==='gif')b.appendChild(document.createElement('canvas'));
     b.addEventListener('click',()=>openZoom(i));
-    grid.appendChild(b);
+    grid.appendChild(fig);
   });
   const counts={};S.items.forEach(d=>d.tags.forEach(t=>counts[t]=(counts[t]||0)+1));
   tagBox.innerHTML='';
@@ -207,11 +211,11 @@ function applyStatic(){
   $('motion').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.m==='pause')===S.stat));
   grid.querySelectorAll('.cell').forEach(c=>{
     const v=c.querySelector('video'),cv=c.querySelector('canvas');
-    if(v){(S.stat||c.hidden||!S.page||S.zoom>-1)?v.pause():v.play().catch(()=>{});}
+    if(v){(S.stat||c.parentElement.hidden||!S.page||S.zoom>-1)?v.pause():v.play().catch(()=>{});}
     if(cv){if(S.stat)freeze(c.querySelector('img'),cv);c.classList.toggle('frozen',S.stat);}
     const d=S.items[c.dataset.i];
     if(d&&d.kind==='embed'){
-      const live=!S.stat&&!c.hidden&&S.page&&S.zoom<0&&(!io||c.dataset.inview==='1');
+      const live=!S.stat&&!c.parentElement.hidden&&S.page&&S.zoom<0&&(!io||c.dataset.inview==='1');
       let f=c.querySelector('iframe');
       if(live&&!f){f=document.createElement('iframe');f.src=embedURL(d.embed,true);f.title=d.title||'Video';f.tabIndex=-1;f.allow='autoplay; fullscreen; picture-in-picture';f.setAttribute('aria-hidden','true');
         f.addEventListener('load',()=>setTimeout(()=>c.classList.add('playing'),400));c.appendChild(f);fitFrame(c,f,d.vr);}
