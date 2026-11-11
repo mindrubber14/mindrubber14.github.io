@@ -41,7 +41,7 @@ function loadCaptions(dir){
   return capCache[dir];
 }
 function captionFor(d,map){
-  const base=(d.file||'').replace(/\.[^.]+$/,'').split('#')[0].trim().toLowerCase();
+  const base=(d.file||'').replace(/\.[^.]+$/,'').split('#')[0].replace(/^\d{4}-\d{2}-\d{2}\s*/,'').trim().toLowerCase();
   if(map[base])return map[base];
   const k=Object.keys(map).find(n=>base.startsWith(n+' '));   // "S9400084" matches "S9400084 vimeo 903194968"
   return k?map[k]:'';
@@ -61,7 +61,9 @@ const keyOf=src=>{const e=embedOf(src);return e?e.type+':'+e.id:dec(src);};
   const page=slugify(parts[2]);
   const folder=parts.length>4?parts[3]:'';
   const m=folder.match(/^(\d{4}-\d{2}-\d{2})\s*(.*)$/);
-  const date=m?m[1]:'';
+  // date from the folder name, or else from the start of the file name ("2026-11-10 intro.mp3")
+  const fm=parts[parts.length-1].match(/^(\d{4}-\d{2}-\d{2})/);
+  const date=m?m[1]:(fm?fm[1]:'');
   // only words after # are tags, in folder names and file names alike: "2023-04-01 uluru trip #uluru 2023"
   const hashTags=t=>t.split('#').slice(1).map(x=>x.replace(/[,\s]+$/,'').trim()).filter(Boolean);
   const tags=hashTags(folder);
@@ -76,7 +78,7 @@ const keyOf=src=>{const e=embedOf(src);return e?e.type+':'+e.id:dec(src);};
   const baseOf=f=>f.replace(/\.[^.]+$/,'').split('#')[0].trim().toLowerCase();
   const imgs={};ALL.forEach(d=>{if(/\.(jpe?g|png|webp|avif|gif)$/i.test(d.file||''))imgs[d.dir+'/'+baseOf(d.file)]=d;});
   ALL.filter(d=>AUDIO_RE.test(d.file||'')).forEach(a=>{
-    a.title=a.file.replace(/\.[^.]+$/,'').split('#')[0].trim();
+    a.title=a.file.replace(/\.[^.]+$/,'').split('#')[0].replace(/^\d{4}-\d{2}-\d{2}\s*/,'').trim();
     const c=imgs[a.dir+'/'+baseOf(a.file)];
     if(c){a.cover=c.src;ALL.splice(ALL.indexOf(c),1);delete bySrc[keyOf(c.src)];}
   });
