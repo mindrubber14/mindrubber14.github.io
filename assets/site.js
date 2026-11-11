@@ -103,7 +103,7 @@ PROJECTS.forEach(p=>{
   const a=document.createElement('a');a.className='row';a.href='#'+p.slug;a.dataset.slug=p.slug;
   a.innerHTML='<span class="t"></span><span class="n"></span>';
   a.querySelector('.t').textContent=p.title;
-  a.querySelector('.n').textContent=ALL.filter(d=>d.p===p.slug).length;
+  a.querySelector('.n').textContent=p.text?'':ALL.filter(d=>d.p===p.slug).length;   // text pages (like Thoughts) show no count
   pagesNav.appendChild(a);
 });
 
@@ -325,7 +325,9 @@ function route(){
   const proj=PROJECTS.find(p=>p.slug===slug)||null;
   closeZoom();
   if((proj&&proj.slug)!==S.page){S.page=proj&&proj.slug;S.tags.clear();S.items=proj?ALL.filter(d=>d.p===proj.slug):[];buildGrid();applyOrder();}
-  $('v-grid').hidden=!proj;$('controls').hidden=!proj;
+  const isText=!!(proj&&proj.text);   // a page with text instead of photos
+  $('v-text').hidden=!isText;if(isText)$('v-text').textContent=proj.text;
+  $('v-grid').hidden=!proj||isText;$('controls').hidden=!proj||isText;
   pagesNav.querySelectorAll('a').forEach(a=>a.classList.toggle('on',a.dataset.slug===S.page));
   if(proj&&mobile())document.body.classList.add('menu-off');
   filter();window.scrollTo(0,0);

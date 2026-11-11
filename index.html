@@ -43,6 +43,7 @@
 <button class="open-menu" id="open" aria-label="Show menu" title="Show menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></svg></button>
 
 <main id="main">
+  <div id="v-text" class="textview" hidden></div>
   <div id="v-grid" hidden>
     <div class="grid" id="grid"></div>
     <div class="empty" id="empty" hidden>Nothing tagged with these yet.</div>
@@ -67,7 +68,7 @@ FILES.push({{ f.path | jsonify }});
 {%- assign none = "" | split: "" -%}
 {%- assign projects = site.projects | sort: "order" -%}
 {%- for p in projects %}
-PROJECTS.push({slug:{{ p.slug | jsonify }},title:{{ p.title | jsonify }}});
+PROJECTS.push({slug:{{ p.slug | jsonify }},title:{{ p.title | jsonify }},text:{{ p.text | jsonify }}});
 {%- endfor -%}
 {%- assign ups = site.uploads | sort: "date" | reverse -%}
 {%- for u in ups -%}

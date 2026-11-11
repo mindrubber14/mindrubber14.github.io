@@ -99,6 +99,9 @@ body.menu-off main{margin-left:0}
 .cell.soft img,.cell.soft video,.cell.soft canvas,.cell.soft iframe{filter:blur(var(--grid-soften));transform:scale(1.03)}
 .cell:hover img,.cell:hover video,.cell:hover canvas,.cell:hover iframe{filter:brightness(.88)}
 .cell.soft:hover img,.cell.soft:hover video,.cell.soft:hover canvas,.cell.soft:hover iframe{filter:blur(var(--grid-soften)) brightness(.88)}
+.textview{min-height:100vh;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 16px 16px;text-align:left;white-space:pre-line;color:var(--fg)}
+body.menu-off .textview{padding-left:48px}  /* clears the » button */
+html.split .textview{color:var(--fg)}
 .empty{padding:24px;color:var(--muted)}
 
 /* ---------- zoom ---------- */
