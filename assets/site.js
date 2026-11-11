@@ -4,7 +4,8 @@ const $=id=>document.getElementById(id);
 const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 const S={order:'time',page:null,items:[],tags:new Set(),stat:store.get('static')==='1',zoom:-1,wasOff:false};
 const mobile=()=>matchMedia('(max-width:760px)').matches;
-const kindOf=src=>/\.gif(\?|$)|^data:image\/gif/i.test(src)?'gif':/\.(mp4|mov|m4v|webm)(\?|$)|^data:video\//i.test(src)?'video':'image';
+const AUDIO_RE=/\.(mp3|wav|m4a|aac|ogg|oga|flac|aif|aiff)(\?|$)/i;
+const kindOf=src=>AUDIO_RE.test(src)?'audio':/\.gif(\?|$)|^data:image\/gif/i.test(src)?'gif':/\.(mp4|mov|m4v|webm)(\?|$)|^data:video\//i.test(src)?'video':'image';
 /* Vimeo / YouTube links */
 function embedOf(u){
   let m=String(u).match(/vimeo\.com\/(?:.*?\/)?(?:video\/)?(\d{5,})(?:\/([0-9a-f]{6,}))?/i);
@@ -24,7 +25,7 @@ function thumbFor(d,cb){
     .then(r=>r.json()).then(j=>cb(j.thumbnail_url,j.width,j.height)).catch(()=>cb('',16,9));
 }
 /* Build the item list: folder photos first, then Pages CMS uploads (which can add captions/tags to folder photos) */
-const MEDIA_RE=/\.(jpe?g|png|gif|webp|avif|mp4|mov|m4v|webm)$/i;
+const MEDIA_RE=/\.(jpe?g|png|gif|webp|avif|mp4|mov|m4v|webm|mp3|wav|m4a|aac|ogg|oga|flac|aif|aiff)$/i;
 const dec=s=>{try{return decodeURIComponent(s)}catch(e){return s}};
 const enc=s=>/^\//.test(s)?dec(s).split('/').map(encodeURIComponent).join('/'):s;  // file names may contain spaces, commas and #
 const slugify=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -70,6 +71,16 @@ const keyOf=src=>{const e=embedOf(src);return e?e.type+':'+e.id:dec(src);};
   ALL.push(d);bySrc[keyOf(src)]=d;
   if(!PROJECTS.some(x=>x.slug===page))PROJECTS.push({slug:page,title:parts[2].replace(/[-_]+/g,' ').replace(/^./,c=>c.toUpperCase()),auto:true});
 });
+/* Sound files: a photo with the same name in the same folder becomes its cover ("track 1.mp3" + "track 1.jpg") */
+{
+  const baseOf=f=>f.replace(/\.[^.]+$/,'').split('#')[0].trim().toLowerCase();
+  const imgs={};ALL.forEach(d=>{if(/\.(jpe?g|png|webp|avif|gif)$/i.test(d.file||''))imgs[d.dir+'/'+baseOf(d.file)]=d;});
+  ALL.filter(d=>AUDIO_RE.test(d.file||'')).forEach(a=>{
+    a.title=a.file.replace(/\.[^.]+$/,'').split('#')[0].trim();
+    const c=imgs[a.dir+'/'+baseOf(a.file)];
+    if(c){a.cover=c.src;ALL.splice(ALL.indexOf(c),1);delete bySrc[keyOf(c.src)];}
+  });
+}
 (window.ITEMS||[]).forEach(d=>{
   const src=enc(d.src),hit=bySrc[keyOf(src)];
   if(hit){ // caption / extra tags for a folder photo
@@ -98,6 +109,8 @@ PROJECTS.forEach(p=>{
 const SOFT=new Set(((window.SOFT)||[]).map(t=>String(t).trim().toLowerCase()));
 const isSoft=d=>d.tags.some(t=>SOFT.has(t));
 
+const SOUND_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/></svg>';
+
 /* --- grid --- */
 const grid=$('grid'),tagBox=$('tags');
 const io='IntersectionObserver' in window?new IntersectionObserver(es=>{es.forEach(en=>{en.target.dataset.inview=en.isIntersecting?'1':'';});applyStatic();},{rootMargin:'200px'}):null;
@@ -111,6 +124,10 @@ function buildGrid(){
     if(d.kind==='video'){
       m=document.createElement('video');m.src=d.src+'#t=0.1';m.muted=true;m.loop=true;m.playsInline=true;m.preload='metadata';
       m.addEventListener('loadedmetadata',()=>setRatio(b,m.videoWidth,m.videoHeight));
+    }else if(d.kind==='audio'){
+      setRatio(b,1,1);b.classList.add('sound');
+      if(d.cover){m=document.createElement('img');m.src=d.cover;m.alt=d.title;m.loading='lazy';}
+      else{m=document.createElement('div');m.className='atile';m.innerHTML=SOUND_ICON+'<span class="an"></span>';m.querySelector('.an').textContent=d.title;}
     }else if(d.kind==='embed'){
       m=document.createElement('img');m.alt=d.title||'';setRatio(b,16,9);
       thumbFor(d,(src,w,h)=>{if(src)m.src=src;d.vr=w&&h?w/h:16/9;setRatio(b,w,h);});
@@ -120,6 +137,7 @@ function buildGrid(){
       m.addEventListener('load',()=>setRatio(b,m.naturalWidth,m.naturalHeight));
     }
     b.appendChild(m);
+    if(d.kind==='audio'&&d.cover){const k=document.createElement('span');k.className='akey';k.innerHTML=SOUND_ICON;b.appendChild(k);}
     if(d.kind==='gif')b.appendChild(document.createElement('canvas'));
     b.addEventListener('click',()=>openZoom(i));
     grid.appendChild(b);
@@ -219,6 +237,12 @@ function openZoom(i){
   S.zoom=i;const d=S.items[i],st=$('stage');st.innerHTML='';
   let m;
   if(d.kind==='video'){m=document.createElement('video');m.src=d.src;m.muted=true;m.loop=true;m.playsInline=true;m.controls=true;m.addEventListener('click',e=>e.stopPropagation());}
+  else if(d.kind==='audio'){
+    m=document.createElement('div');m.className='audiozoom';m.addEventListener('click',e=>e.stopPropagation());
+    if(d.cover){const c=document.createElement('img');c.src=d.cover;c.alt=d.title;m.appendChild(c);}
+    else{const t=document.createElement('div');t.className='atile big';t.innerHTML=SOUND_ICON+'<span class="an"></span>';t.querySelector('.an').textContent=d.title;m.appendChild(t);}
+    const a=document.createElement('audio');a.src=d.src;a.controls=true;a.autoplay=true;a.preload='auto';m.appendChild(a);
+  }
   else if(d.kind==='embed'){m=document.createElement('iframe');m.src=embedURL(d.embed,false);m.title=d.title||'Video';m.allow='autoplay; fullscreen; picture-in-picture';m.allowFullscreen=true;}
   else{m=document.createElement('img');m.src=d.src;m.alt=d.title||'';}
   st.appendChild(m);if(d.kind==='gif')st.appendChild(document.createElement('canvas'));
@@ -249,7 +273,7 @@ function detailClick(e){
 $('detail').addEventListener('click',detailClick);$('zcap').addEventListener('click',detailClick);
 $('zoom').addEventListener('click',e=>{
   if(e.target.closest('.zcap'))return;
-  if(e.target.matches('#stage img,#stage canvas')){toggleFull();return;}   // click the photo: full screen / back
+  if(e.target.matches('#stage > img,#stage > canvas')){toggleFull();return;}   // click the photo: full screen / back
   closeZoom();
 });
 function toggleFull(){

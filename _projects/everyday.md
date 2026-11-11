@@ -1,4 +1,4 @@
 ---
-title: Everyday
+title: Shots
 order: 1
 ---
