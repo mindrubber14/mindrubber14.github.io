@@ -163,6 +163,7 @@ function buildGrid(){
     b.appendChild(m);
     if(d.kind==='audio'&&d.cover){const k=document.createElement('span');k.className='akey';k.innerHTML=SOUND_ICON;b.appendChild(k);}
     if(d.kind==='gif'||(d.preview&&/\.gif$/i.test(d.previewFile)))b.appendChild(document.createElement('canvas'));
+    if(m.tagName==='VIDEO')io&&io.observe(b);   // videos only play while on screen
     b.addEventListener('click',()=>openZoom(i));
     grid.appendChild(fig);
   });
@@ -250,7 +251,7 @@ function applyStatic(){
   $('motion').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.m==='pause')===S.stat));
   grid.querySelectorAll('.cell').forEach(c=>{
     const v=c.querySelector('video'),cv=c.querySelector('canvas');
-    if(v){(S.stat||c.parentElement.hidden||!S.page||S.zoom>-1)?v.pause():v.play().catch(()=>{});}
+    if(v){(S.stat||c.parentElement.hidden||!S.page||S.zoom>-1||(io&&c.dataset.inview!=='1'))?v.pause():v.play().catch(()=>{});}
     if(cv){if(S.stat)freeze(c.querySelector('img'),cv);c.classList.toggle('frozen',S.stat);}
     const d=S.items[c.dataset.i];
     if(d&&d.kind==='embed'&&!d.preview){
