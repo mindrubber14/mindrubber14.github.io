@@ -6,6 +6,11 @@
 soft_tags:
   - fuji
   - uluru 2023
+
+# Photos and videos with any of these tags are left out of the main grid and shuffle.
+# They only show when someone selects the tag in the menu.
+hidden_tags:
+  - c2016-2019
 title: Everyday Garbage
 timezone: Australia/Sydney
 collections:

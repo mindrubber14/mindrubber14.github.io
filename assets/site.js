@@ -108,12 +108,14 @@ ALL.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(a.dir&&a.dir===b.dir?(a
 ALL.forEach(d=>{d.embed=embedOf(d.src);d.kind=d.embed?'embed':kindOf(d.src);d.tags=(d.tags||[]).filter(Boolean).map(t=>String(t).trim().toLowerCase());});
 
 /* --- menu: list of pages --- */
+const HIDDEN=new Set(((window.HIDDEN)||[]).map(t=>String(t).trim().toLowerCase()));
+const isHidden=d=>d.tags.some(t=>HIDDEN.has(t));
 const pagesNav=$('pages');
 PROJECTS.forEach(p=>{
   const a=document.createElement('a');a.className='row';a.href='#'+p.slug;a.dataset.slug=p.slug;
   a.innerHTML='<span class="t"></span><span class="n"></span>';
   a.querySelector('.t').textContent=p.title;
-  a.querySelector('.n').textContent=p.text?'':ALL.filter(d=>d.p===p.slug).length;   // text pages (like Thoughts) show no count
+  a.querySelector('.n').textContent=p.text?'':ALL.filter(d=>d.p===p.slug&&!isHidden(d)).length;   // text pages (like Thoughts) show no count
   pagesNav.appendChild(a);
 });
 
@@ -182,7 +184,7 @@ function visible(){return [...grid.children].filter(c=>!c.hidden).map(c=>+c.data
 function filter(){
   let shown=0;
   [...grid.children].forEach(c=>{const d=S.items[c.dataset.i];
-    const ok=!S.tags.size||d.tags.some(t=>S.tags.has(t));c.hidden=!ok;if(ok)shown++;});
+    const ok=S.tags.size?d.tags.some(t=>S.tags.has(t)):!isHidden(d);c.hidden=!ok;   /* hidden tags only show when selected */if(ok)shown++;});
   tagBox.querySelectorAll('.tag').forEach(b=>{const on=S.tags.has(b.dataset.tag);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
   $('clear').hidden=!S.tags.size;$('empty').hidden=shown>0||!S.page;
   applyStatic();
