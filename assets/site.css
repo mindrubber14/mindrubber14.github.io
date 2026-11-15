@@ -8,7 +8,7 @@
   --gap:0px;  /* space between photos */
   --gap-rows:12px;  /* space between rows (includes the name) */
   --name-size:6pt;  /* size of the small name under each photo */
-  --grid-soften:0.5px;  /* how soft the soft_tags photos look in the grid (0.3px subtle, 1px soft) */
+  --grid-soften:0.3px;  /* how soft the soft_tags photos look in the grid (0.3px subtle, 1px soft) */
   --mono:"Instrument Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
   --menu:232px; --row-base:clamp(46px,4.3vw,75px);  /* smallest photo height in the grid */
   --row-scale:1; --row:calc(var(--row-base) * var(--row-scale));
