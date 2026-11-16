@@ -128,7 +128,10 @@ const SOUND_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 
 /* --- grid --- */
 const grid=$('grid'),tagBox=$('tags');
-const io='IntersectionObserver' in window?new IntersectionObserver(es=>{es.forEach(en=>{en.target.dataset.inview=en.isIntersecting?'1':'';});applyStatic();},{rootMargin:'200px'}):null;
+const io='IntersectionObserver' in window?new IntersectionObserver(es=>{es.forEach(en=>{
+  en.target.dataset.inview=en.isIntersecting?'1':'';
+  if(en.isIntersecting){const v=en.target.querySelector('video[data-src]');if(v&&!v.getAttribute('src')){v.preload='metadata';v.src=v.dataset.src;}}   // load a video only once it's near the screen
+});applyStatic();},{rootMargin:'400px'}):null;
 function setRatio(cell,w,h){if(w&&h){const t=cell.closest('.fig')||cell,r=(w/h).toFixed(3);t.style.flexGrow=r;t.style.width='calc('+r+' * var(--row))';}}
 /* the small name under each photo: file name without tags, date or ending ("DSCF4078") */
 const nameOf=d=>d.file?d.file.replace(/\.[^.]+$/,'').split('#')[0].replace(/^\d{4}-\d{2}-\d{2}\s*/,'').split(/\s+(?:vimeo|youtube|youtu\.?be)\s/i)[0].trim():(d.title||'');
@@ -141,7 +144,7 @@ function buildGrid(){
     setRatio(b,3,2);b.setAttribute('aria-label',d.title||'Photo');
     let m;
     if(d.kind==='video'){
-      m=document.createElement('video');m.src=d.src+'#t=0.1';m.muted=true;m.loop=true;m.playsInline=true;m.preload='metadata';
+      m=document.createElement('video');m.dataset.src=d.src+'#t=0.1';m.muted=true;m.loop=true;m.playsInline=true;m.preload='none';
       m.addEventListener('loadedmetadata',()=>setRatio(b,m.videoWidth,m.videoHeight));
     }else if(d.kind==='audio'){
       setRatio(b,1,1);b.classList.add('sound');
@@ -149,7 +152,7 @@ function buildGrid(){
       else{m=document.createElement('div');m.className='atile';m.innerHTML=SOUND_ICON+'<span class="an"></span>';m.querySelector('.an').textContent=d.title;}
     }else if(d.kind==='embed'&&d.preview){   // plays the preview file; the real video opens on click
       if(/\.(mp4|mov|m4v|webm)$/i.test(d.previewFile)){
-        m=document.createElement('video');m.src=d.preview+'#t=0.1';m.muted=true;m.loop=true;m.playsInline=true;m.preload='metadata';
+        m=document.createElement('video');m.dataset.src=d.preview+'#t=0.1';m.muted=true;m.loop=true;m.playsInline=true;m.preload='none';
         m.addEventListener('loadedmetadata',()=>setRatio(b,m.videoWidth,m.videoHeight));
       }else{
         m=document.createElement('img');m.src=d.preview;m.alt=d.title||'';m.loading='lazy';
@@ -181,14 +184,24 @@ function buildGrid(){
   });
 }
 $('clear').addEventListener('click',()=>{S.tags.clear();filter();});
+const STEP=150;let LIMIT=STEP;
+const more=document.createElement('div');more.id='more';grid.after(more);
+function paginate(){let n=0;[...grid.children].forEach(c=>{if(c.hidden){c.classList.remove('later');return;}n++;c.classList.toggle('later',n>LIMIT);});}
+function maybeMore(){
+  if(!S.page||!grid.querySelector('.fig.later:not([hidden])'))return;
+  if(more.getBoundingClientRect().top<innerHeight+1500){LIMIT+=STEP;paginate();requestAnimationFrame(maybeMore);}
+}
+let moreTick=false;
+const onScroll=()=>{if(moreTick)return;moreTick=true;requestAnimationFrame(()=>{moreTick=false;maybeMore();});};
+window.addEventListener('scroll',onScroll,{passive:true});window.addEventListener('resize',onScroll);
 function visible(){return [...grid.children].filter(c=>!c.hidden).map(c=>+c.dataset.i);}
 function filter(){
-  let shown=0;
+  let shown=0;LIMIT=STEP;
   [...grid.children].forEach(c=>{const d=S.items[c.dataset.i];
     const ok=S.tags.size?d.tags.some(t=>S.tags.has(t)):!isHidden(d);c.hidden=!ok;   /* hidden tags only show when selected */if(ok)shown++;});
   tagBox.querySelectorAll('.tag').forEach(b=>{const on=S.tags.has(b.dataset.tag);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
   $('clear').hidden=!S.tags.size;$('empty').hidden=shown>0||!S.page;
-  applyStatic();
+  paginate();applyStatic();requestAnimationFrame(maybeMore);
 }
 
 /* --- order: time or shuffle (keeps the selected tags) --- */
@@ -197,6 +210,7 @@ function applyOrder(){
   if(S.order==='shuffle'){for(let i=cells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]];}}
   else cells.sort((a,b)=>a.dataset.i-b.dataset.i);
   cells.forEach(c=>grid.appendChild(c));
+  LIMIT=STEP;paginate();requestAnimationFrame(maybeMore);
   $('order').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.o===S.order));
 }
 $('order').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.order=b.dataset.o;applyOrder();window.scrollTo(0,0);});

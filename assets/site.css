@@ -86,6 +86,7 @@ main{margin-left:var(--menu);min-height:100vh}
 body.menu-off main{margin-left:0}
 
 .grid{display:flex;flex-wrap:wrap;gap:var(--gap-rows) var(--gap);padding:var(--gap)}
+.fig.later{display:none}
 .fig{display:flex;flex-direction:column;min-width:0}
 .fig .cell{width:100%}
 .fig .name{font-size:var(--name-size);line-height:1;color:var(--muted);padding-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
