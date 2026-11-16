@@ -7,8 +7,8 @@ soft_tags:
   - fuji
   - uluru 2023
 
-# Photos and videos with any of these tags are left out of the main grid and shuffle.
-# They only show when someone selects the tag in the menu.
+# Photos and videos with any of these tags are hidden from the site completely
+# (not in the grid, the shuffle or the tag list). The files stay in your folder.
 hidden_tags:
   - c2016-2019
 title: Everyday Garbage

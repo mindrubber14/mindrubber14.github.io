@@ -40,6 +40,7 @@ function loadCaptions(dir){
   }).catch(()=>({}));
   return capCache[dir];
 }
+function capDir(dir){let x=dir||'';while(x){if(CAPS[x])return x;x=x.slice(0,x.lastIndexOf('/'));}return null;}
 function captionFor(d,map){
   const base=(d.file||'').replace(/\.[^.]+$/,'').split('#')[0].replace(/^\d{4}-\d{2}-\d{2}\s*/,'').trim().toLowerCase();
   if(map[base])return map[base];
@@ -171,7 +172,7 @@ function buildGrid(){
   });
   const counts={};S.items.forEach(d=>d.tags.forEach(t=>counts[t]=(counts[t]||0)+1));
   tagBox.innerHTML='';
-  Object.keys(counts).sort((a,b)=>counts[b]-counts[a]||a.localeCompare(b)).forEach(t=>{
+  Object.keys(counts).filter(t=>!HIDDEN.has(t)).sort((a,b)=>counts[b]-counts[a]||a.localeCompare(b)).forEach(t=>{   // hidden tags are not listed
     const b=document.createElement('button');b.className='row tag';b.dataset.tag=t;
     b.innerHTML='<span class="t"></span><span class="n"></span>';
     b.querySelector('.t').textContent=t;b.querySelector('.n').textContent=counts[t];
@@ -277,7 +278,7 @@ function fillDetail(el,d,pos,total){
   el.querySelector('h3').textContent=d.title||'';
   const p=el.querySelector('p');if(d.desc)p.textContent=d.desc;else p.remove();
   const tg=el.querySelector('.dtags');
-  d.tags.forEach(t=>{const b=document.createElement('button');b.dataset.tag=t;b.textContent='#'+t;tg.appendChild(b);});
+  d.tags.filter(t=>!HIDDEN.has(t)).forEach(t=>{const b=document.createElement('button');b.dataset.tag=t;b.textContent='#'+t;tg.appendChild(b);});
 }
 function openZoom(i){
   const list=visible(),pos=list.indexOf(i);if(pos<0)return;
@@ -297,7 +298,8 @@ function openZoom(i){
   else{m=document.createElement('img');m.src=d.src;m.alt=d.title||'';}
   st.appendChild(m);if(d.kind==='gif')st.appendChild(document.createElement('canvas'));
   fillDetail($('detail'),d,pos+1,list.length);fillDetail($('zcap'),d,pos+1,list.length);
-  if(!d.desc&&d.dir&&CAPS[d.dir])loadCaptions(d.dir).then(map=>{
+  const cdir=capDir(d.dir);   // nearest captions.txt: this folder, or a folder above it
+  if(!d.desc&&cdir)loadCaptions(cdir).then(map=>{
     const c=captionFor(d,map);
     if(c&&S.zoom===i){d.desc=c;fillDetail($('detail'),d,pos+1,list.length);fillDetail($('zcap'),d,pos+1,list.length);}
   });
